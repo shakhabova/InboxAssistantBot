@@ -8,52 +8,41 @@ export interface ConnectionModel {
 }
 
 export class ImapService {
-  private connections: ConnectionModel[] = [];
+  private connections: imaps.ImapSimple[] = [];
   fromDate = new Date();
 
   constructor(private messagesHandler: (messages: imaps.Message[], conn: ConnectionModel) => void) {
-    this.initConnections();
+    this.initConnectionsAndRun();
   }
 
-  private async initConnections() {
+  private async initConnectionsAndRun() {
     const emails = await readYamlFile<ImapMailModel[]>('./mails.yml');
-    const configs: [imaps.ImapSimpleOptions, ImapMailModel][] = emails.map(email => {
-      return [
-        {
-          imap: {
-            user: email.email,
-            password: email.password,
-            host: email.host,
-            port: email.port,
-            tls: email.tls,
-            authTimeout: 3000,
-          }
-        },
-        email
-      ]
-    });
-
-    this.connections = await Promise.all(configs.map(([conf, mail]) => this.getConn(conf, mail)));
-    this.runInterval();
+    this.connections = await Promise.all(emails.map(email => this.generateConn(email)));
   }
 
-  private async getConn(conf: imaps.ImapSimpleOptions, mail: ImapMailModel): Promise<ConnectionModel> {
-    const conn = await imaps.connect(conf);
+  private async generateConn(emailConfigModel: ImapMailModel): Promise<imaps.ImapSimple> {
+    let conn: imaps.ImapSimple;
+    const connConfig: imaps.ImapSimpleOptions = {
+      imap: {
+        user: emailConfigModel.email,
+        password: emailConfigModel.password,
+        host: emailConfigModel.host,
+        port: emailConfigModel.port,
+        tls: emailConfigModel.tls,
+        authTimeout: 3000,
+      },
+      onmail: () => this.callSearch({ conn, email: emailConfigModel })
+    };
+    conn = await imaps.connect(connConfig);
     await conn.openBox('INBOX');
-    return { conn, email: mail };
-  }
-
-  private async runInterval() {
-    setInterval(async () => {
-      await Promise.all(this.connections.map(conn => this.callSearch(conn)))
-    }, 5000);
+    return conn;
   }
 
   private async callSearch(connModel: ConnectionModel): Promise<void> {
     var searchCriteria = [
+      'UNSEEN',
       ['FROM', connModel.email.fromEmails[0]], // TODO from emails array
       ['SINCE', this.fromDate],
-      'UNSEEN'
     ];
     
     var fetchOptions = {
