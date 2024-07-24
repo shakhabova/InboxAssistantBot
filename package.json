@@ -1,0 +1,31 @@
+{
+  "name": "inboxassistant-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon index.ts",
+    "build": "tsc",
+    "start": "node ./dist/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cron": "^3.1.7",
+    "dotenv": "^16.4.5",
+    "grammy": "^1.27.0",
+    "imap-simple": "^5.1.0",
+    "lodash": "^4.17.21",
+    "mailparser": "^3.7.1",
+    "read-yaml-file": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/imap-simple": "^4.2.9",
+    "@types/lodash": "^4.17.6",
+    "@types/mailparser": "^3.4.4",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}
