@@ -7,7 +7,7 @@ import 'dotenv/config';
 
 const bot = new Bot(process.env.BOT_TOKEN!);
 
-const adminChatId = -4238440205;
+const adminChatId = +process.env.GROUP_ID!;
 
 const imapService = new ImapService(messagesHandler);
 
