@@ -8,7 +8,7 @@ export interface ConnectionModel {
 }
 
 export class ImapService {
-  private connections: imaps.ImapSimple[] = [];
+  private connections: Array<imaps.ImapSimple | undefined> = [];
   fromDate = new Date();
 
   constructor(private messagesHandler: (messages: imaps.Message[], conn: ConnectionModel) => void) {
@@ -20,7 +20,7 @@ export class ImapService {
     this.connections = await Promise.all(emails.map(email => this.generateConn(email)));
   }
 
-  private async generateConn(emailConfigModel: ImapMailModel): Promise<imaps.ImapSimple> {
+  private async generateConn(emailConfigModel: ImapMailModel): Promise<imaps.ImapSimple | undefined> {
     let conn: imaps.ImapSimple;
     const connConfig: imaps.ImapSimpleOptions = {
       imap: {
@@ -33,9 +33,14 @@ export class ImapService {
       },
       onmail: () => this.callSearch({ conn, email: emailConfigModel })
     };
-    conn = await imaps.connect(connConfig);
-    await conn.openBox('INBOX');
-    return conn;
+
+    try {
+      conn = await imaps.connect(connConfig);
+      await conn.openBox('INBOX');
+      return conn;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   private async callSearch(connModel: ConnectionModel): Promise<void> {
@@ -49,9 +54,14 @@ export class ImapService {
       bodies: ['HEADER', 'TEXT', ''],
       markSeen: true
     };
-    const res = await connModel.conn.search(searchCriteria, fetchOptions);
-    if (res?.length) {
-      this.messagesHandler(res, connModel);
+
+    try {
+      const res = await connModel.conn.search(searchCriteria, fetchOptions);
+      if (res?.length) {
+        this.messagesHandler(res, connModel);
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
 }
