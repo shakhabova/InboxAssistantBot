@@ -30,8 +30,11 @@ export class ImapService {
         port: emailConfigModel.port,
         tls: emailConfigModel.tls,
         authTimeout: 3000,
+        tlsOptions: {
+          servername: emailConfigModel.host,
+        }
       },
-      onmail: () => this.callSearch({ conn, email: emailConfigModel })
+      onmail: () => this.callSearch({ conn, email: emailConfigModel }),
     };
 
     try {
