@@ -12,8 +12,7 @@ const adminChatId = +process.env.GROUP_ID!;
 const imapService = new ImapService(messagesHandler);
 
 async function messagesHandler(messages: imaps.Message[], conn: ConnectionModel) {
-  const messagesForBot: string[] = [];
-  messages.forEach(function (item) {
+  for (let item of messages) {
     var all = _.find(item.parts, { which: '' });
     if (!all) {
       return;
@@ -21,8 +20,8 @@ async function messagesHandler(messages: imaps.Message[], conn: ConnectionModel)
 
     var id = item.attributes.uid;
     var idHeader = 'Imap-Id: ' + id + '\r\n';
-    simpleParser(idHeader + all.body, (_err, mail) => {
-      const message = `Почта: ${conn.email.email}
+    const mail = await simpleParser(idHeader + all.body);
+    const message = `Почта: ${conn.email.email}
 От: ${mail.from?.text}
 Тема: ${mail.subject ?? '-пусто-'}
 Время: ${mail.date}
@@ -30,13 +29,8 @@ async function messagesHandler(messages: imaps.Message[], conn: ConnectionModel)
 
 ${mail.text}
       `;
-      messagesForBot.push(message);
-    });
-  });
-
-  for (let message of messagesForBot) {
-    await bot.api.sendMessage(adminChatId, message);
-  }
+      await bot.api.sendMessage(adminChatId, message);
+  };
 }
 
 bot.hears(/hi/i, (ctx) => {
