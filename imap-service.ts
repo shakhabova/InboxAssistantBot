@@ -49,7 +49,7 @@ export class ImapService {
   private async callSearch(connModel: ConnectionModel): Promise<void> {
     var searchCriteria = [
       'UNSEEN',
-      // ['FROM', connModel.email.fromEmails[0]], // TODO from emails array
+      ['FROM', connModel.email.fromEmails[0]], // TODO from emails array
       ['SINCE', this.fromDate],
     ];
     

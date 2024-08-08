@@ -22,9 +22,9 @@ async function messagesHandler(messages: imaps.Message[], conn: ConnectionModel)
     var idHeader = 'Imap-Id: ' + id + '\r\n';
     const mail = await simpleParser(idHeader + all.body);
 
-    if (conn.email.fromEmails.every(fromEmail => !mail.from?.text.includes(fromEmail))) {
-      return;
-    }
+    // if (conn.email.fromEmails.every(fromEmail => !mail.from?.text.includes(fromEmail))) {
+    //   return;
+    // }
 
     const message = `Почта: ${conn.email.email}
 От: ${mail.from?.text}
