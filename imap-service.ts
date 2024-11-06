@@ -1,6 +1,7 @@
 import readYamlFile from "read-yaml-file";
 import * as imaps from 'imap-simple';
 import { ImapMailModel } from "./mail.model";
+import { subDays } from "date-fns";
 
 export interface ConnectionModel {
   conn: imaps.ImapSimple;
@@ -9,7 +10,7 @@ export interface ConnectionModel {
 
 export class ImapService {
   private connections: Array<imaps.ImapSimple | undefined> = [];
-  fromDate = new Date();
+  fromDate = subDays(new Date(), 1);
 
   constructor(private messagesHandler: (messages: imaps.Message[], conn: ConnectionModel) => void) {
     this.initConnectionsAndRun();
